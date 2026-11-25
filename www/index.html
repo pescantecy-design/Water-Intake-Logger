@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Water Intake Logger</title>
+<style>
+:root{--bg:#F5F5F7;--card:#fff;--ink:#1D1D1F;--mute:#6E6E73;--soft:#AAAAAA;--acc:#007AFF;--tint:#E6F1FF;--line:#E5E5EA;--red:#FF3B30;--sh:0 6px 20px rgba(0,60,160,.07);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1D1D1F;--card:#2A2A2D;--ink:#F5F5F7;--mute:#AAAAAA;--tint:#0B2A4D;--line:#3A3A3E;--sh:0 6px 20px rgba(0,0,0,.3)}}
+:root[data-theme="dark"]{--bg:#1D1D1F;--card:#2A2A2D;--ink:#F5F5F7;--mute:#AAAAAA;--tint:#0B2A4D;--line:#3A3A3E;--sh:0 6px 20px rgba(0,0,0,.3)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+main{max-width:440px;margin:0 auto;padding:12px 16px 130px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+h1{font-size:24px;line-height:1.1;letter-spacing:-.02em;margin:0}
+h2{font-size:18px;margin:0}
+.ic{width:22px;height:22px;flex:none}
+.tab{display:none}.tab.on{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:40px;height:40px;border-radius:50%;background:var(--tint);color:var(--acc);display:grid;place-items:center}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:4px 16px}
+.hero{display:grid;grid-template-columns:36% 1fr;gap:14px;align-items:center}
+.bottle{width:100%;display:block}
+.ringwrap{position:relative;aspect-ratio:1;width:100%}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{stroke:var(--tint)}.ring-fg{stroke:var(--acc);transition:stroke-dashoffset .6s ease}
+.ringtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pct{font-size:44px;font-weight:700;letter-spacing:-.03em}
+.ml{font-size:12px;color:var(--mute)}
+.chip{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;background:var(--card);box-shadow:var(--sh);border-radius:16px;padding:10px 12px;text-align:left}
+.chip span{flex:1;display:flex;flex-direction:column;font-size:12px;color:var(--mute)}.chip b{font-size:16px;color:var(--ink)}
+.chip .ic{width:20px;height:20px;color:var(--mute)}.chip .ic:first-child{color:var(--ink)}
+.logbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin:18px 0 12px;height:68px;border-radius:34px;color:#fff;background:linear-gradient(180deg,#2E94FF,#007AFF);box-shadow:0 10px 22px rgba(0,122,255,.35);transition:transform .12s}
+.logbtn:active{transform:scale(.97)}.logbtn .ic{width:32px;height:32px}
+.logbtn span{display:flex;flex-direction:column;text-align:left}.logbtn b{font-size:19px}.logbtn small{font-size:14px;opacity:.9}
+.amts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.amts button{background:var(--card);box-shadow:var(--sh);border-radius:16px;padding:12px 0;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;font-size:15px;border:2px solid transparent}
+.amts button .ic{color:var(--acc);width:20px;height:20px}
+.amts button.on{border-color:var(--acc);background:var(--tint)}
+.sechead{display:flex;justify-content:space-between;align-items:center;margin:24px 2px 10px}
+.link{color:var(--acc);font-size:14px;font-weight:600}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.ci{width:40px;height:40px;border-radius:12px;background:var(--tint);color:var(--acc);display:grid;place-items:center;flex:none}
+.rt{flex:1;display:flex;flex-direction:column;font-size:16px}.rt small{color:var(--mute);font-size:15px}
+.undo{background:var(--tint);color:var(--acc);font-weight:600;font-size:14px;padding:7px 14px;border-radius:14px}
+.tr{color:var(--red);padding:6px;display:grid}
+.empty{padding:20px 0;color:var(--mute);text-align:center;font-size:15px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);box-shadow:var(--sh);border-radius:20px;padding:4px;margin-bottom:12px}
+.seg button{padding:9px 0;border-radius:16px;font-size:15px;color:var(--mute)}
+.seg button.on{background:var(--acc);color:#fff;font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.stat b{font-size:24px;letter-spacing:-.02em}.stat span{color:var(--mute);font-size:14px}
+.stat .ic{color:var(--acc)}
+.mini{display:flex;align-items:center;gap:8px}.mini svg{width:44px;height:44px;transform:rotate(-90deg)}
+.hh{margin:22px 2px 10px}
+.tl{position:relative}.tl::before{content:"";position:absolute;left:20px;top:28px;bottom:28px;width:2px;background:var(--acc);opacity:.3}
+.tl .row{position:relative;padding-left:24px}
+.tl .row::before{content:"";position:absolute;left:0;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--acc)}
+.bars{display:flex;align-items:flex-end;gap:3px;height:170px;padding:16px 0 4px}
+.bar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;min-width:0}
+.bar i{display:block;width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:var(--acc);opacity:.3;min-height:3px}
+.bar i.met{opacity:1}.bar small{font-size:11px;color:var(--mute);height:14px}
+.cap{color:var(--mute);font-size:13px;padding:0 0 12px}
+.ban{display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px;border-radius:22px;background:var(--tint)}
+.ban em{font-style:normal;font-size:38px}.ban b{display:block;font-size:18px}.ban span{color:var(--mute);font-size:14px}
+.hero2{display:flex;align-items:center;gap:14px;margin:6px 0 20px}
+.hero2 .logo{width:68px;height:68px}.hero2 .ic{width:34px;height:34px}.hero2 span{color:var(--mute);font-size:15px}
+.gt{font-size:18px;font-weight:700;margin:22px 2px 8px}
+.set{padding:0 16px}
+.sr{display:flex;align-items:center;gap:12px;width:100%;padding:14px 0;border-bottom:1px solid var(--line);font-size:16px;text-align:left}
+.sr:last-child{border:0}.sr>span{flex:1}.sr .ic{color:var(--ink)}.sr .v{flex:none;color:var(--mute)}
+.sr.red{color:var(--red)}.sr.red .ic{color:var(--red)}
+.sr select,.sr input[type=number]{font:inherit;color:var(--mute);background:none;border:0;text-align:right;width:auto;max-width:96px;appearance:none;-webkit-appearance:none}
+.sr input[type=number]{width:60px}
+.sw{appearance:none;-webkit-appearance:none;width:52px;height:32px;border-radius:16px;background:var(--line);position:relative;transition:background .2s;flex:none;margin:0;cursor:pointer}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .2s}
+.sw:checked{background:var(--acc)}.sw:checked::after{transform:translateX(20px)}
+.note{color:var(--mute);font-size:13px;margin:10px 4px}
+nav{position:fixed;left:0;right:0;bottom:0;padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:3}
+nav div{display:grid;grid-template-columns:repeat(3,1fr);max-width:408px;margin:0 auto;background:var(--card);box-shadow:var(--sh);border-radius:26px;padding:6px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;font-size:12px;color:var(--mute)}
+nav button.on{color:var(--acc);font-weight:600}
+#toast{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));max-width:408px;margin:0 auto;background:var(--card);color:var(--ink);box-shadow:0 12px 32px rgba(0,0,0,.18);padding:14px;border-radius:22px;transform:translateY(-160%);transition:transform .35s;z-index:6;display:flex;gap:12px;text-align:left}
+#toast.show{transform:none}#toast .tt{display:flex;justify-content:space-between;color:var(--mute);font-size:14px}#toast p{margin:2px 0 0;font-size:14px;color:var(--mute)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:24px;z-index:8}
+.ov[hidden]{display:none}
+.sheet{background:var(--card);border-radius:28px;width:100%;max-width:340px;padding:24px 22px 22px;text-align:center;animation:up .25s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.sheet h3{font-size:26px;margin:14px 0 4px;letter-spacing:-.02em}.sheet p{margin:0 0 18px;color:var(--mute);font-size:15px}
+.sheet input{width:100%;font:inherit;font-size:22px;text-align:center;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:14px}
+.pb{display:block;width:100%;height:52px;border-radius:26px;background:linear-gradient(180deg,#2E94FF,#007AFF);color:#fff;font-weight:600;font-size:17px;box-shadow:0 8px 18px rgba(0,122,255,.3)}
+.pb.dg{background:var(--red);box-shadow:none}.gh{display:block;width:100%;padding:14px;color:var(--mute);font-size:16px}
+.err{color:var(--red)!important;margin:-6px 0 12px!important;font-size:14px!important}
+.badge{position:relative;width:150px;height:110px;margin:0 auto}
+.badge b{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;background:linear-gradient(180deg,#2E94FF,#007AFF);color:#fff;display:grid;place-items:center;animation:pop .45s both}
+.badge b .ic{width:40px;height:40px}
+.badge s{position:absolute;left:50%;top:50%;width:4px;height:11px;border-radius:2px;background:var(--acc);transform:rotate(var(--a)) translateY(-56px);animation:dash .5s .1s both}
+@keyframes pop{from{transform:scale(.4)}}@keyframes dash{from{transform:rotate(var(--a)) translateY(-28px) scale(0)}}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.wave{animation:w 4s linear infinite}@keyframes w{to{transform:translateX(-60px)}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.5c3.5 4.4 6 7.7 6 11a6 6 0 0 1-12 0c0-3.3 2.5-6.6 6-11z" fill="currentColor"/></symbol>
+<symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 4h14l-1.6 15a2 2 0 0 1-2 1.8H8.6a2 2 0 0 1-2-1.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5.7 10h12.6l-.9 9a2 2 0 0 1-2 1.8H8.6a2 2 0 0 1-2-1.8z" fill="currentColor"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 3l9 8.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><g fill="currentColor"><rect x="3" y="11" width="4.5" height="10" rx="1.2"/><rect x="9.8" y="3" width="4.5" height="18" rx="1.2"/><rect x="16.5" y="8" width="4.5" height="13" rx="1.2"/></g></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7.6" stroke-width="3.2" stroke-dasharray="3.3 2.5"/><circle cx="12" cy="12" r="6.4" stroke-width="1.6"/></g></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></g></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></g></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l7-7"/></g></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4"/></g></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
+<div id="toast" role="status"></div>
+<div class="ov" id="ov" hidden><div class="sheet" id="sh" role="dialog" aria-modal="true"></div></div>
+
+<main>
+<section class="tab on" id="t-home">
+  <header class="top">
+    <div class="brand"><span class="logo"><i data-i="drop"></i></span><h1>Water Intake<br>Logger</h1></div>
+    <button class="ib" data-tab="set" aria-label="Settings"><i data-i="gear"></i></button>
+  </header>
+  <div class="hero">
+    <svg class="bottle" viewBox="0 0 200 320" aria-label="Bottle filling with water">
+      <defs><clipPath id="clip"><path d="M70 40h60v22c0 10 40 22 40 56v160c0 18-12 30-30 30H60c-18 0-30-12-30-30V118c0-34 40-46 40-56z"/></clipPath></defs>
+      <rect x="72" y="8" width="56" height="32" rx="8" fill="#007AFF"/>
+      <path d="M70 40h60v22c0 10 40 22 40 56v160c0 18-12 30-30 30H60c-18 0-30-12-30-30V118c0-34 40-46 40-56z" fill="var(--tint)"/>
+      <g clip-path="url(#clip)"><g id="water" style="transition:transform .8s ease" transform="translate(0,310)">
+        <path class="wave" d="M-60 0q15-10 30 0t30 0 30 0 30 0 30 0 30 0 30 0 30 0 30 0 30 0V320H-60z" fill="#007AFF"/></g></g>
+      <path d="M70 40h60v22c0 10 40 22 40 56v160c0 18-12 30-30 30H60c-18 0-30-12-30-30V118c0-34 40-46 40-56z" fill="none" stroke="var(--soft)" stroke-width="3"/>
+    </svg>
+    <div>
+      <div class="ringwrap">
+        <svg viewBox="0 0 120 120"><circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="9"/><circle id="rf" class="ring-fg" cx="60" cy="60" r="52" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
+        <div class="ringtxt"><div class="pct" id="pct">0%</div><div class="ml" id="mltxt"></div></div>
+      </div>
+      <button class="chip" data-act="goal"><i data-i="target"></i><span>Daily Goal<b id="gchip"></b></span><i data-i="pencil"></i></button>
+    </div>
+  </div>
+  <button class="logbtn" data-act="log"><i data-i="cup"></i><span><b>Tap to Log</b><small id="amtl"></small></span></button>
+  <div class="amts">
+    <button data-amt="180"><i data-i="cup"></i>180 ml</button>
+    <button data-amt="250"><i data-i="cup"></i>250 ml</button>
+    <button data-amt="500"><i data-i="cup"></i>500 ml</button>
+  </div>
+  <div class="sechead"><h2>Today’s Log</h2><button class="link" data-tab="hist">See All</button></div>
+  <div class="card" id="log"></div>
+</section>
+
+<section class="tab" id="t-hist">
+  <header class="top"><h1 style="font-size:30px">History</h1></header>
+  <div class="seg" id="seg"><button data-r="1" class="on">Today</button><button data-r="7">7 Days</button><button data-r="30">30 Days</button></div>
+  <div class="two">
+    <div class="card stat"><i data-i="drop"></i><b id="hs1"></b><span id="hl1"></span></div>
+    <div class="card stat"><div class="mini"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="var(--tint)" stroke-width="6"/><circle id="hr" cx="24" cy="24" r="20" fill="none" stroke="var(--acc)" stroke-width="6" stroke-linecap="round" stroke-dasharray="125.7" stroke-dashoffset="125.7"/></svg><b id="hs2"></b></div><span>Goal Progress</span></div>
+  </div>
+  <h2 class="hh" id="hh">Log Entries</h2>
+  <div class="card" id="hlist"></div>
+  <div class="ban" id="ban"></div>
+</section>
+
+<section class="tab" id="t-set">
+  <header class="top"><h1 style="font-size:30px">Settings</h1></header>
+  <div class="hero2"><span class="logo"><i data-i="drop"></i></span><div><h2>Water Intake Logger</h2><span>Stay hydrated, stay healthy!</span></div></div>
+  <div class="gt">Daily Goal</div>
+  <div class="card set"><button class="sr" data-act="goal"><i data-i="target"></i><span>Set Your Goal</span><span class="v" id="sgoal"></span><i data-i="chev"></i></button></div>
+  <div class="gt">Reminders</div>
+  <div class="card set">
+    <label class="sr"><i data-i="bell"></i><span>Enable Reminders</span><input type="checkbox" class="sw" id="rem" role="switch"></label>
+    <label class="sr"><i data-i="clock"></i><span>Reminder Interval</span><select id="every" aria-label="Reminder interval"></select></label>
+    <label class="sr"><i data-i="clock"></i><span>Start at (hour, 0–23)</span><input type="number" id="start" min="0" max="23"></label>
+    <label class="sr"><i data-i="clock"></i><span>Stop at (hour, 1–24)</span><input type="number" id="end" min="1" max="24"></label>
+  </div>
+  <p class="note">Reminders arrive as phone notifications, even when the app is closed. Allow notifications when asked.</p>
+  <div class="gt">Appearance</div>
+  <div class="card set"><label class="sr"><i data-i="moon"></i><span>Dark Mode</span><input type="checkbox" class="sw" id="dark" role="switch"></label></div>
+  <div class="gt">Data</div>
+  <div class="card set">
+    <button class="sr red" data-act="reset"><i data-i="refresh"></i><span>Reset Today’s Data</span><i data-i="chev"></i></button>
+    <button class="sr red" data-act="clear"><i data-i="trash"></i><span>Clear All Data</span><i data-i="chev"></i></button>
+  </div>
+</section>
+</main>
+
+<nav><div>
+  <button class="on" data-tab="home"><i data-i="home"></i>Home</button>
+  <button data-tab="hist"><i data-i="chart"></i>History</button>
+  <button data-tab="set"><i data-i="gear"></i>Settings</button>
+</div></nav>
+
+<script>
+(function(){
+var K="water-logger-v1",S={goal:2000,rem:true,every:2,start:8,end:22,days:{},last:0,dark:null,amt:250},R=1;
+try{var raw=localStorage.getItem(K);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+var $=function(i){return document.getElementById(i)};
+function key(d){d=d||new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
+function today(){return S.days[key()]||(S.days[key()]=[])}
+function sum(a){return a.reduce(function(x,y){return x+y.ml},0)}
+function total(){return sum(today())}
+function fmt(n){return n.toLocaleString("en-US")}
+function ic(n){return '<svg class="ic"><use href="#i-'+n+'"/></svg>'}
+function icons(){document.querySelectorAll("i[data-i]").forEach(function(e){e.outerHTML=ic(e.dataset.i)})}
+function hm(t){return new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+
+function theme(){var r=document.documentElement;if(S.dark===null)r.removeAttribute("data-theme");else r.setAttribute("data-theme",S.dark?"dark":"light")}
+function isDark(){return S.dark===null?matchMedia("(prefers-color-scheme:dark)").matches:S.dark}
+
+/* Native phone reminders (Capacitor). In a normal browser LN is null and the in-app toast is used instead. */
+var LN=null;
+try{if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())LN=Capacitor.Plugins.LocalNotifications}catch(e){}
+async function perm(){
+  if(!LN)return false;
+  try{var p=await LN.checkPermissions();if(p.display!=="granted")p=await LN.requestPermissions();return p.display==="granted"}catch(e){return false}
+}
+function slots(d){
+  var out=[],day=new Date();day.setDate(day.getDate()+d);
+  var st=new Date(day);st.setHours(S.start,0,0,0);
+  var en=new Date(day);en.setHours(S.end,0,0,0);
+  var L=d===0?today():[],t=L.length?new Date(L[L.length-1].t+S.every*36e5):st;
+  if(t<st)t=st;
+  for(;t<en;t=new Date(t.getTime()+S.every*36e5)){if(t.getTime()>Date.now()+5000)out.push(new Date(t))}
+  return out;
+}
+async function plan(){
+  if(!LN)return;
+  try{
+    var pend=await LN.getPending();
+    if(pend.notifications.length)await LN.cancel({notifications:pend.notifications.map(function(n){return{id:n.id}})});
+    if(!S.rem)return;
+    var p=await LN.checkPermissions();if(p.display!=="granted")return;
+    var out=[],id=1;
+    for(var d=0;d<7;d++){
+      if(d===0&&total()>=S.goal)continue;
+      slots(d).forEach(function(at){out.push({id:id++,title:"Time to drink water! 🥤",body:"You haven’t reached your daily goal yet. Let’s drink some water! 💙",schedule:{at:at}})});
+    }
+    if(out.length)await LN.schedule({notifications:out});
+  }catch(e){}
+}
+var pt;function planSoon(){clearTimeout(pt);pt=setTimeout(plan,500)}
+
+function rowHtml(e,first){
+  return '<div class="row"><span class="ci">'+ic("cup")+'</span><div class="rt"><b>'+hm(e.t)+'</b><small>'+e.ml+' ml</small></div>'+
+  (first?'<button class="undo" data-del="'+e.id+'">Undo</button>':'')+
+  '<button class="tr" data-del="'+e.id+'" aria-label="Delete '+e.ml+' ml entry">'+ic("trash")+'</button></div>';
+}
+
+function hist(){
+  var n=R,L=[],i,d,s,tt=0,met=0;
+  for(i=n-1;i>=0;i--){d=new Date();d.setDate(d.getDate()-i);s=sum(S.days[key(d)]||[]);L.push({d:d,s:s});tt+=s;if(s>=S.goal)met++}
+  var val=n===1?tt:Math.round(tt/n),p=Math.min(100,Math.round(val/S.goal*100)),box=$("hlist"),h="";
+  $("hs1").textContent=fmt(val)+" ml";$("hl1").textContent=n===1?"Total Today":"Daily Average";
+  $("hs2").textContent=p+"%";$("hr").style.strokeDashoffset=125.7*(1-p/100);
+  box.className="card"+(n===1?" tl":"");
+  if(n===1){
+    $("hh").textContent="Log Entries";
+    var E=today().slice().reverse();
+    h=E.length?E.map(function(e){return rowHtml(e,false)}).join(""):'<div class="empty">Nothing logged yet today.</div>';
+  }else{
+    $("hh").textContent="Last "+n+" days";
+    var mx=Math.max(S.goal,Math.max.apply(null,L.map(function(x){return x.s})));
+    h='<div class="bars" role="img" aria-label="Daily intake for the last '+n+' days">'+L.map(function(x,k){
+      var lab=n===7?x.d.toLocaleDateString("en-US",{weekday:"narrow"}):(k%5===0?x.d.getDate():"");
+      return '<div class="bar"><i class="'+(x.s>=S.goal?"met":"")+'" style="height:'+Math.round(x.s/mx*100)+'%"></i><small>'+lab+'</small></div>'}).join("")+'</div><div class="cap">Solid bars reached your goal.</div>';
+  }
+  box.innerHTML=h;
+  var b;
+  if(n===1){
+    var now=new Date(),hr=now.getHours()+now.getMinutes()/60,exp=S.goal*Math.max(0,Math.min(1,(hr-S.start)/(S.end-S.start)));
+    if(tt>=S.goal)b=["🏆","Goal reached!","You hit today’s goal. Nice work!"];
+    else if(tt===0)b=["💧","Start your day","Log your first drink to get going."];
+    else if(tt>=exp*.9)b=["🏆","Great job!","You’re on track to meet your goal!"];
+    else b=["💪","Keep going","Only "+fmt(S.goal-tt)+" ml to go. A glass now helps you catch up."];
+  }else b=[met?"🏆":"💧",met+" of "+n+" days on goal",met?"Keep the streak going!":"Hit your goal today to get on the board."];
+  $("ban").innerHTML='<em>'+b[0]+'</em><div><b>'+b[1]+'</b><span>'+b[2]+'</span></div>';
+}
+
+function render(){
+  var t=total(),p=Math.min(100,Math.round(t/S.goal*100));
+  $("pct").textContent=p+"%";$("mltxt").textContent=fmt(t)+" / "+fmt(S.goal)+" ml";
+  $("rf").style.strokeDashoffset=326.7*(1-p/100);
+  $("gchip").textContent=fmt(S.goal)+" ml";$("sgoal").textContent=fmt(S.goal)+" ml";
+  $("water").setAttribute("transform","translate(0,"+(310-215*Math.min(1,t/S.goal))+")");
+  $("amtl").textContent=S.amt+" ml";
+  document.querySelectorAll("[data-amt]").forEach(function(b){b.classList.toggle("on",+b.dataset.amt===S.amt)});
+  var E=today().slice().reverse().slice(0,3);
+  $("log").innerHTML=E.length?E.map(function(e,i){return rowHtml(e,i===0)}).join(""):'<div class="empty">Nothing logged yet. Tap to log your first drink.</div>';
+  hist();
+  planSoon();
+}
+
+function go(name){
+  document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on")});
+  document.querySelectorAll("nav button").forEach(function(x){x.classList.toggle("on",x.dataset.tab===name)});
+  $("t-"+name).classList.add("on");window.scrollTo(0,0);
+}
+
+var ov=$("ov"),sh=$("sh");
+function sheet(h){sh.innerHTML=h;ov.hidden=false;var f=sh.querySelector("input,button");if(f)f.focus()}
+function closeSheet(){ov.hidden=true}
+function confirmSheet(title,msg,label,act){sheet('<h3 style="font-size:22px;margin-top:0">'+title+'</h3><p>'+msg+'</p><button class="pb dg" data-act="'+act+'">'+label+'</button><button class="gh" data-act="x">Cancel</button>')}
+
+function add(ml){
+  today().push({id:Date.now(),ml:ml,t:Date.now()});S.last=Date.now();save();render();
+  if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
+  var c="";for(var i=0;i<8;i++)c+='<s style="--a:'+(i*45+10)+'deg"></s>';
+  sheet('<div class="badge">'+c+'<b>'+ic("check")+'</b></div><h3>Nice!</h3><p>'+ml+' ml logged!</p><button class="pb" data-act="x">Awesome!</button>');
+}
+
+document.addEventListener("click",function(e){
+  var t=e.target;
+  if(t===ov){closeSheet();return}
+  var a=t.closest("[data-act]");
+  if(a){
+    var c=a.dataset.act;
+    if(c==="log")add(S.amt);
+    else if(c==="x")closeSheet();
+    else if(c==="goal")sheet('<h3 style="font-size:22px;margin-top:0">Set your goal</h3><p>Daily water goal in ml</p><input type="number" id="gi" inputmode="numeric" min="500" max="6000" step="50" value="'+S.goal+'" aria-label="Daily goal in ml"><button class="pb" data-act="savegoal">Save goal</button><button class="gh" data-act="x">Cancel</button>');
+    else if(c==="savegoal"){
+      var v=Math.round(+$("gi").value);
+      if(!(v>=500&&v<=6000)){if(!sh.querySelector(".err"))$("gi").insertAdjacentHTML("afterend",'<p class="err">Enter a goal between 500 and 6,000 ml.</p>');return}
+      S.goal=v;save();render();closeSheet();
+    }
+    else if(c==="reset")confirmSheet("Reset today’s data?","This removes all of today’s entries. You can’t undo this.","Reset today","doreset");
+    else if(c==="clear")confirmSheet("Clear all data?","This removes every entry from every day. You can’t undo this.","Clear all data","doclear");
+    else if(c==="doreset"){S.days[key()]=[];save();render();closeSheet()}
+    else if(c==="doclear"){S.days={};S.last=0;save();render();closeSheet()}
+    return;
+  }
+  var m=t.closest("[data-amt]");if(m){S.amt=+m.dataset.amt;save();render();return}
+  var d=t.closest("[data-del]");if(d){var id=+d.dataset.del;S.days[key()]=today().filter(function(x){return x.id!==id});save();render();return}
+  var r=t.closest("[data-r]");if(r){R=+r.dataset.r;document.querySelectorAll("#seg button").forEach(function(x){x.classList.toggle("on",x===r)});hist();return}
+  var tb=t.closest("[data-tab]");if(tb){go(tb.dataset.tab);return}
+  if(t.closest("#toast"))$("toast").classList.remove("show");
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSheet()});
+
+var ev=$("every");for(var i=1;i<=6;i++)ev.insertAdjacentHTML("beforeend",'<option value="'+i+'">'+i+(i===1?" hour":" hours")+'</option>');
+ev.value=S.every;
+[["every","every"],["start","start"],["end","end"]].forEach(function(p){
+  var el=$(p[0]);el.value=S[p[1]];
+  el.addEventListener("change",function(){var v=+el.value;if(v>0||p[1]==="start"){S[p[1]]=v;save();render()}});
+});
+$("rem").checked=S.rem;
+$("rem").addEventListener("change",function(){
+  S.rem=$("rem").checked;save();
+  if(S.rem&&LN)perm().then(plan);
+  else if(S.rem&&window.Notification&&Notification.permission==="default"){try{Notification.requestPermission()}catch(e){}}
+  else planSoon();
+});
+$("dark").checked=isDark();
+$("dark").addEventListener("change",function(){S.dark=$("dark").checked;save();theme()});
+
+var tt;
+function toast(left){
+  var t=$("toast");
+  t.innerHTML='<span class="logo">'+ic("drop")+'</span><div><div class="tt"><span>Water Intake Logger</span><small>now</small></div><b>Time to drink water! 🥤</b><p>You haven’t reached your daily goal yet. '+fmt(left)+' ml to go.</p></div>';
+  t.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("show")},8000);
+}
+function check(){
+  if(LN)return;
+  var now=new Date(),h=now.getHours();
+  if(!S.rem||h<S.start||h>=S.end)return;
+  var t=total();if(t>=S.goal)return;
+  var base=S.last||new Date(now.getFullYear(),now.getMonth(),now.getDate(),S.start).getTime();
+  if(now-base>=S.every*3600000){
+    S.last=Date.now();save();toast(S.goal-t);
+    try{if(window.Notification&&Notification.permission==="granted")new Notification("Water Intake Logger",{body:"Time to drink water! "+fmt(S.goal-t)+" ml left today."})}catch(e){}
+  }
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)render()});
+icons();theme();setInterval(check,60000);check();render();
+if(LN&&S.rem)perm().then(plan);
+})();
+</script>
+</body>
+</html>
