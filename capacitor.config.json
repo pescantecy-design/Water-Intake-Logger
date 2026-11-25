@@ -1,0 +1,11 @@
+{
+  "appId": "com.waterlogger.app",
+  "appName": "Water Intake Logger",
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_drop",
+      "iconColor": "#007AFF"
+    }
+  }
+}
